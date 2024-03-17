@@ -120,6 +120,7 @@ void SudokuWidget::addNumber(int number) {
        }
        if (isIncorrect(_selectedCellIndex.x(), _selectedCellIndex.y()) && !_incorrectCells.contains(_selectedCellIndex)) {
            _incorrectCells.append(_selectedCellIndex);
+       } else if (isIncorrect(_selectedCellIndex.x(), _selectedCellIndex.y()) && _incorrectCells.contains(_selectedCellIndex)){
        } else {
            _incorrectCells.removeOne(_selectedCellIndex);
        }
