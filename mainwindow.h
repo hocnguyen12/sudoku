@@ -14,8 +14,10 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    void onNumberButtonClicked();
     ~MainWindow();
-
+private slots:
+    void onDifficultyChanged(int index);
 private:
     Ui::MainWindow *ui;
     SudokuWidget * _sudoku;

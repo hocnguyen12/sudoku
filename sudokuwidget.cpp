@@ -10,18 +10,32 @@
 #include <QRandomGenerator>
 #include <QDateTime>
 #include <QDebug>
+#include <QPushButton>
 
 #include <QMouseEvent>
 
 SudokuWidget::SudokuWidget(QWidget *parent)
     : QWidget{parent}
 {
+    _difficulties << "Easy" << "Medium" << "Hard" << "Insane";
+
     for (int row = 0; row < 9; ++row) {
        for (int col = 0; col < 9; ++col) {
            _grid[row][col] = 0;
         }
     }
     _selectedCellIndex = QPoint(-1, -1);
+    _difficulty = 1; // Easy by default
+
+
+    _diffLabel = new QLabel(this);
+    _diffLabel->move(0, 475);
+
+/*
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(_diffLabel);
+    setLayout(mainLayout);*/
+
 }
 
 void SudokuWidget::paintEvent(QPaintEvent *event) {
@@ -35,20 +49,19 @@ void SudokuWidget::paintEvent(QPaintEvent *event) {
 
     // Draw numbers
     painter.setFont(QFont("Arial", 16));
-    int index = 0;
     for (int row = 0; row < 9; ++row) {
         for (int col = 0; col < 9; ++col) {
             if (_highlightedCells.contains(QPoint(row, col))) {
-                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#82B1BD"));
+                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#E5D1D1"));
             }
             if (_selectedCellIndex == QPoint(row, col)) {
-                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#62A6FB"));
+                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#B7A7A7"));
             }
             if (_grid[row][col] != 0) {
                 QString number = QString::number(_grid[row][col]);
 
                 // Si le nombre a été chargé à partir du fichier, utilisez une couleur de fond différente
-                if (_loadedCells.contains(index)) {
+                if (_loadedCells.contains(QPoint(row, col))) {
                     painter.setPen(Qt::black);
                 } else {
                     painter.setPen(pen);
@@ -56,7 +69,6 @@ void SudokuWidget::paintEvent(QPaintEvent *event) {
 
                 painter.drawText(col * cellSize + 20, row * cellSize + 35, number);
             }
-            index++;
         }
     }
 
@@ -88,6 +100,21 @@ void SudokuWidget::clearGrid() {
             _grid[row][col] = 0;
         }
     }
+    _highlightedCells.clear();
+    _loadedCells.clear();
+}
+
+void SudokuWidget::addNumber(int number) {
+    qDebug() << "SudokuWidget::addNumber : " << number;
+
+
+    if (_selectedCellIndex != QPoint(-1, -1)) {
+       if (!_loadedCells.contains(_selectedCellIndex)) {
+            _grid[_selectedCellIndex.x()][_selectedCellIndex.y()] = number;
+            update();
+       }
+    }
+
 }
 
 void SudokuWidget::mousePressEvent(QMouseEvent *event) {
@@ -126,7 +153,21 @@ void SudokuWidget::loadGrid() {
     clearGrid();
     qDebug() << "SudokuWidget::LoadGrid";
 
-    QString file_name = ":/grids/Insane.txt";
+    QString file_name;
+    switch(_difficulty) {
+        case 1:
+            file_name = ":/grids/Easy.txt";
+            break;
+        case 2:
+            file_name = ":/grids/Medium.txt";
+            break;
+        case 3:
+            file_name = ":/grids/Hard.txt";
+            break;
+        case 4:
+            file_name = ":/grids/Insane.txt";
+            break;
+    }
 
     QFile file(file_name);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -146,9 +187,18 @@ void SudokuWidget::loadGrid() {
     for (int i = 1; i <= numSuites; ++i) {
         selectedGrid = in.readLine();
         if (i == randomLine) {
+            QString text = "Grid ";
+            text.append(_difficulties[_difficulty - 1]);
+            text.append('#');
+            text.append(QString::number(i));
+            qDebug() << text;
+            _diffLabel->setText(text);
+            _diffLabel->adjustSize();
+            _diffLabel->show();
             break;
         }
     }
+    qDebug() << "diff : " << _difficulty;
 
     _loadedCells.clear();
     int index = 0;
@@ -156,7 +206,7 @@ void SudokuWidget::loadGrid() {
         for (int col = 0; col < 9; ++col) {
             if (selectedGrid.at(index) != '0') {
                 _grid[row][col] = selectedGrid.at(index).digitValue();
-                _loadedCells.append(index);
+                _loadedCells.append(QPoint(row, col));
             }
             index++;
         }
@@ -164,16 +214,13 @@ void SudokuWidget::loadGrid() {
 
     qDebug() << "Suite de chiffres choisie au hasard :" << selectedGrid;
 
-    /*
-    for (int row = 0; row < 9; ++row) {
-        for (int col = 0; col < 9; ++col) {
-            qDebug() << _grid[row][col];
-        }
-    }*/
-
     file.close();
 
     // call paintEvent
     update();
+}
+
+void SudokuWidget::setDifficulty(int diff) {
+    _difficulty = diff;
 }
 
