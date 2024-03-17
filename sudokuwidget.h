@@ -19,7 +19,6 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
-    void clearGrid();
     bool isIncorrect(int row, int col);
     void checkEnd();
 private:
@@ -38,6 +37,8 @@ signals:
 
 public slots:
     void loadGrid();
+    void clearGrid();
+
 };
 
 #endif // SUDOKUWIDGET_H

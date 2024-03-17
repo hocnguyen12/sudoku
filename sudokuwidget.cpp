@@ -108,6 +108,10 @@ void SudokuWidget::clearGrid() {
     }
     _highlightedCells.clear();
     _loadedCells.clear();
+    _incorrectCells.clear();
+
+    _diffLabel->setText("");
+    update();
 }
 
 void SudokuWidget::addNumber(int number) {
