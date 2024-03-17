@@ -133,6 +133,7 @@ void SudokuWidget::clearGrid() {
     _highlightedCells.clear();
     _loadedCells.clear();
     _incorrectCells.clear();
+    _notes.clear();
 
     _diffLabel->setText("");
     update();
