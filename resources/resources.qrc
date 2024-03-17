@@ -5,9 +5,12 @@
         <file>Insane.txt</file>
         <file>Medium.txt</file>
     </qresource>
-    <qresource prefix="/img"/>
-    <qresource lang="us" prefix="/img">
+    <qresource prefix="/img">
         <file>sudoku1.png</file>
         <file>sudoku2.png</file>
+    </qresource>
+    <qresource prefix="/stylesheets">
+        <file>darkMode.qss</file>
+        <file>lightMode.qss</file>
     </qresource>
 </RCC>

@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Création d'un QTimer pour mettre à jour le temps écoulé
     timer = new QTimer(this);
+    ui->_time->setText("00:00:00");
     connect(timer, &QTimer::timeout, this, &MainWindow::updateTime);
 
     // Connecte le signal "clicked()" du bouton "loadButton" à la fonction startTimerOnLoad()
@@ -44,6 +45,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_Rules, &QAction::triggered, this, &MainWindow::showRules);
     connect(ui->action_About, &QAction::triggered, this, &MainWindow::showAbout);
     connect(ui->action_Credits, &QAction::triggered, this, &MainWindow::showCredits);
+
+    // connecter le signal gameEnded a l'arret du timer
+    connect(_sudoku, &SudokuWidget::gameEnded, this, &MainWindow::stopTimer);
+    connect(ui->buttonClear, &QPushButton::clicked, this, &MainWindow::stopAndResetTimer);
+
+    // DARK and LIGHT modes
+    connect(ui->action_Dark, &QAction::triggered, this, [this]() {
+        loadStyleSheet(":/stylesheets/darkMode.qss");
+    });
+
+    connect(ui->action_Light, &QAction::triggered, this, [this]() {
+        loadStyleSheet(":/stylesheets/lightMode.qss");
+    });
+
+    // NOTE button
+    ui->noteMode->setCheckable(true);
+    connect(ui->noteMode, &QCheckBox::stateChanged, this, &MainWindow::onToggleButtonStateChanged);
 }
 
 void MainWindow::onNumberButtonClicked() {
@@ -60,7 +78,6 @@ void MainWindow::onDifficultyChanged(int index) {
 
 void MainWindow::startTimerOnLoad()
 {
-    // Démarre le chronomètre
     timer->start(1000); // Met à jour toutes les 1000 ms (1 seconde)
     startTime = QTime::currentTime();
 }
@@ -68,16 +85,22 @@ void MainWindow::startTimerOnLoad()
 
 void MainWindow::updateTime()
 {
-    // Calcule le temps écoulé depuis le démarrage
     QTime currentTime = QTime::currentTime();
     int elapsed = startTime.secsTo(currentTime);
 
-    // Formatage du temps écoulé pour l'affichage
     QTime displayTime = QTime(0, 0).addSecs(elapsed);
     QString displayString = displayTime.toString("hh:mm:ss");
 
-    // Mise à jour du label avec le temps écoulé
     ui->_time->setText(displayString);
+}
+
+void MainWindow::stopTimer() {
+    timer->stop();
+}
+
+void MainWindow::stopAndResetTimer() {
+    timer->stop();
+    ui->_time->setText("00:00:00");
 }
 
 void MainWindow::openHowToPlay()
@@ -117,14 +140,38 @@ void MainWindow::showCredits()
                           "<b>Course Professor:</b><br>"
                           "- Prof. Sebastien Fourey<br><br>"
                           "<b>TP Supervisor:</b><br>"
-                          "- Prof. Jean-Jacquess SCHWARTMMANN";
+                          "- Prof. Jean-Jacques SCHWARTZMANN";
 
     QMessageBox::information(this, "Credits", creditsText);
 }
 
 void MainWindow::newGame()
 {
+    int number = rand() % 4 + 1;
+    _sudoku->setDifficulty(number);
+    _sudoku->loadGrid();
+}
 
+void MainWindow::loadStyleSheet(const QString &fileName) {
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        qDebug() << "Erreur : Impossible d'ouvrir le fichier de style" << fileName;
+        return;
+    }
+
+    QTextStream in(&file);
+    QString styleSheet = in.readAll();
+    qApp->setStyleSheet(styleSheet);
+
+    file.close();
+}
+
+void MainWindow::onToggleButtonStateChanged(){
+    if (ui->noteMode->isChecked()) {
+        _sudoku->setMode(1);
+    } else {
+        _sudoku->setMode(0);
+    }
 }
 
 MainWindow::~MainWindow()

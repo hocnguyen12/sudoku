@@ -28,16 +28,11 @@ SudokuWidget::SudokuWidget(QWidget *parent)
     }
     _selectedCellIndex = QPoint(-1, -1);
     _difficulty = 1; // Easy by default
+    _mode = 0;
 
 
     _diffLabel = new QLabel(this);
     _diffLabel->move(0, 475);
-
-/*
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->addWidget(_diffLabel);
-    setLayout(mainLayout);*/
-
 }
 
 void SudokuWidget::paintEvent(QPaintEvent *event) {
@@ -54,10 +49,13 @@ void SudokuWidget::paintEvent(QPaintEvent *event) {
     for (int row = 0; row < 9; ++row) {
         for (int col = 0; col < 9; ++col) {
             if (_highlightedCells.contains(QPoint(row, col))) {
-                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#E5D1D1"));
+                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#8ab4e1"));
+            }
+            if (_selectedCells.contains(QPoint(row, col))) {
+                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#609ee1"));
             }
             if (_selectedCellIndex == QPoint(row, col)) {
-                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#B7A7A7"));
+                painter.fillRect(col * cellSize, row * cellSize, cellSize, cellSize, QColor("#60a8f5"));
             }
             if (_grid[row][col] != 0) {
                 QString number = QString::number(_grid[row][col]);
@@ -74,6 +72,32 @@ void SudokuWidget::paintEvent(QPaintEvent *event) {
                 }
 
                 painter.drawText(col * cellSize + 20, row * cellSize + 35, number);
+            }
+        }
+    }
+
+    // Draw notes
+    painter.setFont(QFont("Arial", 10)); // Choisissez la taille de la police pour les notes
+    for (auto it = _notes.begin(); it != _notes.end(); ++it) {
+        QPoint cellPosition = it.key();
+        QList<int> notesList = it.value();
+
+        int xOffset = 5;
+        int yOffset = 15;
+        int count = 0;
+        for (int noteValue : notesList) {
+            QString noteText = QString::number(noteValue);
+
+            int xPos = cellPosition.y() * cellSize + xOffset;
+            int yPos = cellPosition.x() * cellSize + yOffset;
+            painter.drawText(xPos, yPos, noteText);
+
+            // Ajustez l'offset pour le prochain chiffre de note dans la même cellule
+            xOffset += 15; // Ajustez cette valeur selon vos besoins pour positionner le texte dans la cellule
+            count++;
+            if (count % 3 == 0) {
+                xOffset = 5; // Réinitialisez l'offset horizontal
+                yOffset += 15; // Augmentez l'offset vertical pour passer à la ligne suivante
             }
         }
     }
@@ -117,18 +141,41 @@ void SudokuWidget::clearGrid() {
 void SudokuWidget::addNumber(int number) {
     qDebug() << "SudokuWidget::addNumber : " << number;
 
-    if (_selectedCellIndex != QPoint(-1, -1)) {
-       if (!_loadedCells.contains(_selectedCellIndex)) {
-            _grid[_selectedCellIndex.x()][_selectedCellIndex.y()] = number;
-            update();
-       }
-       if (isIncorrect(_selectedCellIndex.x(), _selectedCellIndex.y()) && !_incorrectCells.contains(_selectedCellIndex)) {
-           _incorrectCells.append(_selectedCellIndex);
-       } else if (isIncorrect(_selectedCellIndex.x(), _selectedCellIndex.y()) && _incorrectCells.contains(_selectedCellIndex)){
-       } else {
-           _incorrectCells.removeOne(_selectedCellIndex);
-       }
-       qDebug() << _incorrectCells;
+    int row = _selectedCellIndex.x();
+    int col = _selectedCellIndex.y();
+
+    // Add a note
+    if (_mode == 1) {
+        if (_grid[row][col] == 0 && !_loadedCells.contains(_selectedCellIndex)) {
+            QPoint cellPosition(row, col);
+            if (_notes[cellPosition].contains(number)) {
+                // remove nb from list of notes
+                _notes[cellPosition].removeOne(number);
+            } else {
+                // add nb to list of notes
+                _notes[cellPosition].append(number);
+            }
+        }
+    }
+
+    if (_mode == 0) {
+        if (_selectedCellIndex != QPoint(-1, -1)) {
+           if (!_loadedCells.contains(_selectedCellIndex)) {
+                if (_grid[row][col] == number) {
+                     _grid[row][col] = 0;
+                } else {
+                    _grid[row][col] = number;
+                    _notes[QPoint(row, col)].clear();
+                }
+           }
+           if (isIncorrect(row, col) && !_incorrectCells.contains(_selectedCellIndex)) {
+               _incorrectCells.append(_selectedCellIndex);
+           } else if (isIncorrect(row, col) && _incorrectCells.contains(_selectedCellIndex)){
+           } else {
+               _incorrectCells.removeOne(_selectedCellIndex);
+           }
+           qDebug() << _incorrectCells;
+        }
     }
     update();
     checkEnd();
@@ -178,6 +225,7 @@ void SudokuWidget::checkEnd() {
         msgBox.setText("You have won.");
         msgBox.exec();
         // STOP TIMER
+        emit gameEnded();
     }
 }
 
@@ -186,7 +234,7 @@ void SudokuWidget::mousePressEvent(QMouseEvent *event) {
     QPoint clickPos = event->pos();
 
     _highlightedCells.clear();
-
+    _selectedCells.clear();
 
     int cellSize = 50;
     int row = clickPos.y() / cellSize;
@@ -197,16 +245,32 @@ void SudokuWidget::mousePressEvent(QMouseEvent *event) {
         for (int i = 0; i < 9; ++i) {
             _highlightedCells.append(QPoint(row, i));
         }
-
         // Changez la couleur de toutes les cases sur la colonne
         for (int i = 0; i < 9; ++i) {
             _highlightedCells.append(QPoint(i, col));
         }
+        int regionRow = row / 3 * 3; // L'indice de la première ligne de la région 3x3
+        int regionCol = col / 3 * 3; // L'indice de la première colonne de la région 3x3
+        for (int i = regionRow; i < regionRow + 3; ++i) {
+            for (int j = regionCol; j < regionCol + 3; ++j) {
+                _highlightedCells.append(QPoint(i, j));
+            }
+        }
 
         _selectedCellIndex = QPoint(row, col);
+
+        int value = _grid[row][col];
+        for (int i = 0; i < 9; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                if (_grid[i][j] == value && i != row && j != col && value != 0) {
+                    _selectedCells.append(QPoint(i, j));
+                }
+            }
+        }
         update();
     } else {
         _highlightedCells.clear();
+        _selectedCells.clear();
         _selectedCellIndex = QPoint(-1, -1);
         update();
     }
@@ -285,5 +349,9 @@ void SudokuWidget::loadGrid() {
 
 void SudokuWidget::setDifficulty(int diff) {
     _difficulty = diff;
+}
+
+void SudokuWidget::setMode(int mode) {
+    _mode = mode;
 }
 

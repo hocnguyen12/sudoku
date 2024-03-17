@@ -1,0 +1,34 @@
+/* darkMode.qss */
+
+/* Couleurs */
+QWidget {
+    background-color: #3d3b3b;
+    color: #ffffff;
+}
+
+QPushButton {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+}
+
+QPushButton:hover {
+    background-color: #555555;
+}
+
+QComboBox {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+}
+
+QComboBox::drop-down {
+    border: none;
+}
+
+QLabel {
+    color: #ffffff;
+}
+
+/* Autres styles */
+

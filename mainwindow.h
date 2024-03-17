@@ -6,6 +6,7 @@
 #include "howtoplaywidget.h"
 #include <QTimer>
 #include <QTime>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,8 +20,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     void onNumberButtonClicked();
     ~MainWindow();
+    void stopTimer();
+    void stopAndResetTimer();
+    void loadStyleSheet(const QString &fileName);
+
 private slots:
     void onDifficultyChanged(int index);
+    void onToggleButtonStateChanged();
     void updateTime();
     void startTimerOnLoad();
     void openHowToPlay();
