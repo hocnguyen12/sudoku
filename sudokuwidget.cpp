@@ -14,6 +14,8 @@
 
 #include <QMouseEvent>
 
+#include <QMessageBox>
+
 SudokuWidget::SudokuWidget(QWidget *parent)
     : QWidget{parent}
 {
@@ -67,6 +69,10 @@ void SudokuWidget::paintEvent(QPaintEvent *event) {
                     painter.setPen(pen);
                 }
 
+                if (_incorrectCells.contains(QPoint(row, col))) {
+                    painter.setPen(Qt::red);
+                }
+
                 painter.drawText(col * cellSize + 20, row * cellSize + 35, number);
             }
         }
@@ -107,15 +113,69 @@ void SudokuWidget::clearGrid() {
 void SudokuWidget::addNumber(int number) {
     qDebug() << "SudokuWidget::addNumber : " << number;
 
-
     if (_selectedCellIndex != QPoint(-1, -1)) {
        if (!_loadedCells.contains(_selectedCellIndex)) {
             _grid[_selectedCellIndex.x()][_selectedCellIndex.y()] = number;
             update();
        }
+       if (isIncorrect(_selectedCellIndex.x(), _selectedCellIndex.y()) && !_incorrectCells.contains(_selectedCellIndex)) {
+           _incorrectCells.append(_selectedCellIndex);
+       } else {
+           _incorrectCells.removeOne(_selectedCellIndex);
+       }
+       qDebug() << _incorrectCells;
+    }
+    update();
+    checkEnd();
+}
+
+bool SudokuWidget::isIncorrect(int row, int col) {
+    int value = _grid[row][col];
+    // Check row
+    for (int i = 0; i < 9; ++i) {
+        if (i != col && _grid[row][i] == value) {
+            return true;
+        }
+    }
+    // check column
+    for (int i = 0; i < 9; ++i) {
+        if (i != row && _grid[i][col] == value) {
+            return true;
+        }
+    }
+    // Check 3x3 region
+    int regionRow = row / 3 * 3;
+    int regionCol = col / 3 * 3;
+    for (int i = regionRow; i < regionRow + 3; ++i) {
+        for (int j = regionCol; j < regionCol + 3; ++j) {
+            if (i != row && j != col && _grid[i][j] == value) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void SudokuWidget::checkEnd() {
+    bool flag = true;
+    for (int row = 0; row < 9; ++row) {
+        for (int col = 0; col < 9; ++col) {
+            if (_grid[row][col] == 0)
+                flag = false;
+        }
+    }
+    if (!_incorrectCells.isEmpty()){
+        flag = false;
     }
 
+    if (flag) {
+        QMessageBox msgBox;
+        msgBox.setText("You have won.");
+        msgBox.exec();
+        // STOP TIMER
+    }
 }
+
 
 void SudokuWidget::mousePressEvent(QMouseEvent *event) {
     QPoint clickPos = event->pos();
@@ -168,10 +228,9 @@ void SudokuWidget::loadGrid() {
             file_name = ":/grids/Insane.txt";
             break;
     }
-
     QFile file(file_name);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Erreur lors de l'ouverture du fichier.";
+        qDebug() << "Error opening file";
         return;
     }
 
@@ -211,8 +270,7 @@ void SudokuWidget::loadGrid() {
             index++;
         }
     }
-
-    qDebug() << "Suite de chiffres choisie au hasard :" << selectedGrid;
+    qDebug() << "GRID :" << selectedGrid;
 
     file.close();
 

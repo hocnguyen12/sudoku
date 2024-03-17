@@ -20,7 +20,8 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void clearGrid();
-
+    bool isIncorrect(int row, int col);
+    void checkEnd();
 private:
     int _difficulty; // 1 : easy
                      // 2 : medium
@@ -30,6 +31,7 @@ private:
     int _grid[9][9];
     QList<QPoint> _loadedCells;
     QList<QPoint> _highlightedCells;
+    QList<QPoint> _incorrectCells;
     QPoint _selectedCellIndex;
     QLabel * _diffLabel;
 signals:
