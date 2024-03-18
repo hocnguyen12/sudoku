@@ -11,7 +11,19 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setWindowTitle("Sudoku");
+/*
+    QIcon fileOpen = QIcon::fromTheme("document-open");
+    QIcon fileSave = QIcon::fromTheme("document-save-as");
+    QIcon adressNew = QIcon::fromTheme("document-new");
+    ui->action_Open->setIcon(fileOpen);
+    ui->action_Save_as->setIcon(fileSave);
+    ui->action_New_Invoice->setIcon(adressNew);
 
+    QIcon file = QIcon::fromTheme("document-file");
+    ui->menu_File->setIcon(file);
+    QIcon option = QIcon::fromTheme("options");
+    ui->menu_Option->setIcon(option);
+*/
     _sudoku = ui->sudokuWidget;
     connect(ui->buttonLoad, &QPushButton::clicked, _sudoku, &SudokuWidget::loadGrid);
 

@@ -9,9 +9,9 @@ HowToPlayWidget::HowToPlayWidget(QWidget *parent) : QDialog(parent)
     setWindowTitle("How to Play");
 
     // Création des QLabel pour le texte
-    QLabel *titleLabel = new QLabel("Bienvenue dans notre jeu Sudoku", this);
+    QLabel *titleLabel = new QLabel("Welcome to Sudoku", this);
     QLabel *instructionLabel = new QLabel("Instructions :", this);
-    QLabel *playInstructionLabel = new QLabel("Pour jouer, utilisez la souris pour cliquer sur une case. \n Une fois sélectionnée, vous pouvez choisir un chiffre parmi ceux disponibles en bas.", this);
+    QLabel *playInstructionLabel = new QLabel("To play, use the mouse.\n Once a square selected, you can chose a number from 1 to 9 to input a number.", this);
 
     // Création des QLabel pour les images
     QLabel *imageLabel1 = new QLabel(this);

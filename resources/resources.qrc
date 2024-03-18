@@ -8,6 +8,8 @@
     <qresource prefix="/img">
         <file>sudoku1.png</file>
         <file>sudoku2.png</file>
+        <file>icon.png</file>
+        <file>icon2.png</file>
     </qresource>
     <qresource prefix="/stylesheets">
         <file>darkMode.qss</file>

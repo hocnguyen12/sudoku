@@ -62,6 +62,7 @@ signals:
 public slots:
     void loadGrid();
     void clearGrid();
+
 signals:
     void gameEnded();
 };
