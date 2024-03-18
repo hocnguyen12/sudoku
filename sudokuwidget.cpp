@@ -222,11 +222,12 @@ void SudokuWidget::checkEnd() {
     }
 
     if (flag) {
+        // STOP TIMER
+        emit gameEnded();
+
         QMessageBox msgBox;
         msgBox.setText("You have won.");
         msgBox.exec();
-        // STOP TIMER
-        emit gameEnded();
     }
 }
 
