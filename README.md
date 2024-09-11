@@ -13,9 +13,9 @@ TP Supervisor:
 - Prof. Jean-Jacques SCHWARTZMANN
 
 ### Game Interface
-![Screenshot from 2024-09-11 21-26-34](https://github.com/user-attachments/assets/1029f290-c84f-43ec-aacb-e4a356f4a2ac)
+![Screenshot from 2024-09-11 21-26-52](https://github.com/user-attachments/assets/4e42bfa0-5d81-4e7b-93f4-fb238f6e3121)
 
-![Screenshot from 2024-09-11 21-26-52](https://github.com/user-attachments/assets/91298ef4-eeb5-4f38-a3ff-bea6bffda567)
+![Screenshot from 2024-09-11 21-26-34](https://github.com/user-attachments/assets/f749bef0-bb6d-47f7-9a83-b742514b231f)
 
 ### Features
 - Players can choose from 4 difficulties (Easy, Medium, Hard and Insane)
@@ -24,3 +24,4 @@ TP Supervisor:
 
 ### Resolution Assistance
 Incorrect values are displayed in red
+
