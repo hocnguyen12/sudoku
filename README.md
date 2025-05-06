@@ -5,7 +5,8 @@ Game engine is in c++, graphical user interface is made with qtcreator
 ### Project Credits  
 Students:  
 - Paul NGUYEN  
-- Cécile LU  
+- Cécile LU
+
 Course Professor:  
 - Prof. Sebastien Fourey  
   
